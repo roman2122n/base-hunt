@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Farcaster Frame Meta Tags -->
+    <meta property="fc:frame" content="vNext">
+    <meta property="fc:frame:image" content="https://via.placeholder.com/1910x1000/0052ff/ffffff?text=BASE+HUNTER+Action+Game>
+    <meta property="fc:frame:button:1" content="🎯 Start Hunting">
+    <meta property="fc:frame:button:2" content="🏆 Leaderboard">
+    <meta property="fc:frame:button:3" content="📖 How to Play">
+    <meta property="og:image" content="https://via.placeholder.com/1910x1000/0052ff/ffffff?text=BASE+HUNTER+Game">
+    <meta property="og:title" content="Base Hunter - Token Hunting Game">
+    <meta property="og:description" content="Hunt tokens, avoid traps, become the ultimate Base Hunter!">
+    
+    <title>Base Hunter - Action Game</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+        }
+        
+        .game-container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            border: 2px solid #0052ff;
+        }
+        
+        .game-header {
+            background: linear-gradient(135deg, #0052ff 0%, #7c3aed 100%);
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-header::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        
+        .game-title {
+            font-size: 3em;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+        
+        .game-subtitle {
+            font-size: 1.3em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stats-panel {
+            background: #1e293b;
+            padding: 25px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            border-bottom: 3px solid #0052ff;
+        }
+        
+        .stat-box {
+            text-align: center;
+            background: rgba(0, 82, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 82, 255, 0.3);
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #0052ff;
+        }
+        
+        .game-area {
+            padding: 40px;
+            min-height: 500px;
+        }
+        
+        .hunting-ground {
+            background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+            border-radius: 16px;
+            padding: 30px;
+            min-height: 400px;
+            position: relative;
+            border: 3px solid #475569;
+            overflow: hidden;
+        }
+        
+        .scene-text {
+            font-size: 1.3em;
+            line-height: 1.8;
+            color: #e2e8f0;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(0, 82, 255, 0.15);
+            border-radius: 12px;
+            border-left: 5px solid #0052ff;
+        }
+        
+        .targets-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .target {
+            background: linear-gradient(135deg, #475569 0%, #334155 100%);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid #475569;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .target::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(0, 82, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.5s;
+        }
+        
+        .target:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .target:hover {
+            transform: translateY(-5px);
+            border-color: #0052ff;
+            box-shadow: 0 10px 30px rgba(0, 82, 255, 0.4);
+        }
+        
+        .target-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .target-label {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #e2e8f0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            min-width: 200px;
+            background: linear-gradient(135deg, #0052ff 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 82, 255, 0.3);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 82, 255, 0.5);
+        }
+        
+        .action-btn.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .action-btn.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .inventory {
+            background: rgba(0, 82, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .inventory-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #0052ff;
+            margin-bottom: 15px;
+        }
+        
+        .inventory-items {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .inventory-item {
+            background: #1e293b;
+            padding: 15px 25px;
+            border-radius: 8px;
+            border: 2px solid #475569;
+            font-size: 1.5em;
+        }
+        
+        .result-message {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            animation: slideIn 0.5s;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-message.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 2px solid #10b981;
+        }
+        
+        .result-message.danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 2px solid #ef4444;
+        }
+        
+        .result-message.warning {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 2px solid #fbbf24;
+        }
+        
+        .victory-screen {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .victory-title {
+            font-size: 3.5em;
+            color: #10b981;
+            margin-bottom: 20px;
+            animation: victoryBounce 1s ease-in-out infinite;
+        }
+        
+        @keyframes victoryBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .final-score {
+            font-size: 2em;
+            margin: 20px 0;
+            color: #fbbf24;
+        }
+        
+        .leaderboard {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .leaderboard-title {
+            font-size: 2em;
+            color: #0052ff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(0, 82, 255, 0.1);
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 2px solid rgba(0, 82, 255, 0.3);
+        }
+        
+        .rank-badge {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fbbf24;
+            min-width: 50px;
+        }
+        
+        .player-info {
+            flex: 1;
+            margin: 0 20px;
+        }
+        
+        .score-badge {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #10b981;
+        }
+        
+        .how-to-play {
+            background: rgba(0, 82, 255, 0.1);
+            border-radius: 12px;
+            padding: 30px;
+            line-height: 1.8;
+        }
+        
+        .how-to-play h3 {
+            color: #0052ff;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        
+        .how-to-play ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .how-to-play li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+            font-size: 1.1em;
+        }
+        
+        .how-to-play li::before {
+            content: '🎯';
+            position: absolute;
+            left: 0;
+            font-size: 1.3em;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">🏹 BASE HUNTER</h1>
+            <p class="game-subtitle">Hunt Tokens, Avoid Traps, Become Legend!</p>
+        </div>
+        
+        <div class="stats-panel">
+            <div class="stat-box">
+                <div class="stat-label">🎯 Tokens</div>
+                <div class="stat-value" id="tokens">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">❤️ Health</div>
+                <div class="stat-value" id="health">100</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">⚔️ Rounds</div>
+                <div class="stat-value" id="rounds">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">🏆 Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+        </div>
+        
+        <div class="game-area" id="gameArea">
+            <!-- Game content will be injected here -->
+        </div>
+    </div>
+    
+    <script>
+        // Game State
+        let gameState = {
+            tokens: 0,
+            health: 100,
+            rounds: 0,
+            score: 0,
+            inventory: [],
+            difficulty: 1
+        };
+        
+        // Game Scenarios
+        const scenarios = [
+            {
+                type: 'hunt',
+                text: "🌲 You enter the Digital Forest. Three glowing objects appear before you. Choose wisely - only one is a real token!",
+                targets: [
+                    { icon: '🪙', label: 'Golden Token', isToken: true, reward: 50 },
+                    { icon: '💣', label: 'Trap Box', isToken: false, damage: 20 },
+                    { icon: '🎁', label: 'Mystery Box', isToken: false, random: true }
+                ]
+            },
+            {
+                type: 'hunt',
+                text: "⛰️ Mountain Peak! You spot three caves. Legends say treasure awaits, but danger lurks too...",
+                targets: [
+                    { icon: '💎', label: 'Diamond Token', isToken: true, reward: 75 },
+                    { icon: '🕸️', label: 'Spider Nest', isToken: false, damage: 30 },
+                    { icon: '🪙', label: 'Silver Token', isToken: true, reward: 40 }
+                ]
+            },
+            {
+                type: 'hunt',
+                text: "🏛️ Ancient Temple discovered! Three pedestals glow with mysterious energy. Make your choice!",
+                targets: [
+                    { icon: '⚡', label: 'Power Crystal', isToken: false, heal: 30 },
+                    { icon: '🪙', label: 'Sacred Token', isToken: true, reward: 100 },
+                    { icon: '💀', label: 'Cursed Skull', isToken: false, damage: 40 }
+                ]
+            },
+            {
+                type: 'hunt',
+                text: "🌊 Underwater Cave! Treasures shine through the water. Dive carefully!",
+                targets: [
+                    { icon: '🐚', label: 'Pearl Shell', isToken: true, reward: 60 },
+                    { icon: '🦈', label: 'Shark Zone', isToken: false, damage: 35 },
+                    { icon: '🪙', label: 'Coral Token', isToken: true, reward: 55 }
+                ]
+            },
+            {
+                type: 'hunt',
+                text: "🏜️ Desert Ruins! Three mysterious items buried in sand. What will you uncover?",
+                targets: [
+                    { icon: '💣', label: 'Bomb', isToken: false, damage: 25 },
+                    { icon: '👑', label: 'Royal Token', isToken: true, reward: 90 },
+                    { icon: '🗝️', label: 'Ancient Key', isToken: false, special: 'key' }
+                ]
+            }
+        ];
+        
+        // Initialize Game
+        function initGame() {
+            renderMainMenu();
+        }
+        
+        // Render Main Menu
+        function renderMainMenu() {
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <div class="hunting-ground">
+                    <div class="scene-text">
+                        <h2 style="font-size: 2em; margin-bottom: 20px; color: #fbbf24;">🏹 Welcome, Hunter!</h2>
+                        <p style="font-size: 1.2em;">
+                            The Base Network is filled with hidden tokens and dangerous traps. 
+                            Your mission: Hunt as many tokens as possible while avoiding deadly traps!
+                        </p>
+                        <p style="margin-top: 20px; font-size: 1.1em;">
+                            <strong style="color: #10b981;">Win Condition:</strong> Collect 10 tokens OR survive 15 rounds!<br>
+                            <strong style="color: #ef4444;">Lose Condition:</strong> Health reaches zero!
+                        </p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn success" onclick="startHunting()">🎯 Start Hunting</button>
+                        <button class="action-btn" onclick="showLeaderboard()">🏆 Leaderboard</button>
+                        <button class="action-btn" onclick="showHowToPlay()">📖 How to Play</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Start Hunting
+        function startHunting() {
+            if (gameState.health <= 0) {
+                gameOver();
+                return;
+            }
+            
+            if (gameState.tokens >= 10 || gameState.rounds >= 15) {
+                victory();
+                return;
+            }
+            
+            gameState.rounds++;
+            updateStats();
+            
+            const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+            renderHuntingScene(scenario);
+        }
+        
+        // Render Hunting Scene
+        function renderHuntingScene(scenario) {
+            const gameArea = document.getElementById('gameArea');
+            
+            let targetsHTML = '';
+            scenario.targets.forEach((target, index) => {
+                targetsHTML += `
+                    <div class="target" onclick="selectTarget(${index}, ${JSON.stringify(target).replace(/"/g, '&quot;')})">
+                        <div class="target-icon">${target.icon}</div>
+                        <div class="target-label">${target.label}</div>
+                    </div>
+                `;
+            });
+            
+            gameArea.innerHTML = `
+                <div class="hunting-ground">
+                    <div class="scene-text">${scenario.text}</div>
+                    <div class="targets-container">
+                        ${targetsHTML}
+                    </div>
+                    ${gameState.inventory.length > 0 ? `
+                        <div class="inventory">
+                            <div class="inventory-title">🎒 Inventory</div>
+                            <div class="inventory-items">
+                                ${gameState.inventory.map(item => `<div class="inventory-item">${item}</div>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // Select Target
+        function selectTarget(index, target) {
+            let resultHTML = '';
+            
+            if (target.isToken) {
+                gameState.tokens++;
+                gameState.score += target.reward;
+                resultHTML = `
+                    <div class="result-message success">
+                        🎉 SUCCESS! Found a token! +${target.reward} points!
+                    </div>
+                `;
+            } else if (target.damage) {
+                gameState.health -= target.damage;
+                if (gameState.health < 0) gameState.health = 0;
+                resultHTML = `
+                    <div class="result-message danger">
+                        💥 TRAP! Lost ${target.damage} health!
+                    </div>
+                `;
+            } else if (target.heal) {
+                gameState.health += target.heal;
+                if (gameState.health > 100) gameState.health = 100;
+                resultHTML = `
+                    <div class="result-message success">
+                        💚 HEALING! Restored ${target.heal} health!
+                    </div>
+                `;
+            } else if (target.random) {
+                const isGood = Math.random() > 0.5;
+                if (isGood) {
+                    const bonus = Math.floor(Math.random() * 50) + 30;
+                    gameState.score += bonus;
+                    resultHTML = `
+                        <div class="result-message success">
+                            🎁 LUCKY! Mystery bonus: +${bonus} points!
+                        </div>
+                    `;
+                } else {
+                    const penalty = Math.floor(Math.random() * 20) + 10;
+                    gameState.health -= penalty;
+                    resultHTML = `
+                        <div class="result-message danger">
+                            ⚠️ UNLUCKY! Mystery trap: -${penalty} health!
+                        </div>
+                    `;
+                }
+            } else if (target.special === 'key') {
+                gameState.inventory.push('🗝️');
+                resultHTML = `
+                    <div class="result-message warning">
+                        🗝️ Found a special key! Added to inventory!
+                    </div>
+                `;
+            }
+            
+            updateStats();
+            
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <div class="hunting-ground">
+                    ${resultHTML}
+                    <div class="scene-text" style="text-align: center; font-size: 1.5em;">
+                        Round ${gameState.rounds} Complete!<br>
+                        <span style="color: #fbbf24;">Tokens: ${gameState.tokens}/10</span> | 
+                        <span style="color: #ef4444;">Health: ${gameState.health}%</span>
+                    </div>
+                    <div class="action-buttons">
+                        ${gameState.health > 0 && gameState.tokens < 10 && gameState.rounds < 15 ? 
+                            '<button class="action-btn success" onclick="startHunting()">⚔️ Continue Hunting</button>' : 
+                            '<button class="action-btn" onclick="checkGameEnd()">📊 View Results</button>'
+                        }
+                    </div>
+                </div>
+            `;
+            
+            if (gameState.health <= 0) {
+                setTimeout(gameOver, 1500);
+            } else if (gameState.tokens >= 10 || gameState.rounds >= 15) {
+                setTimeout(victory, 1500);
+            }
+        }
+        
+        // Check Game End
+        function checkGameEnd() {
+            if (gameState.health <= 0) {
+                gameOver();
+            } else if (gameState.tokens >= 10 || gameState.rounds >= 15) {
+                victory();
+            }
+        }
+        
+        // Victory
+        function victory() {
+            const gameArea = document.getElementById('gameArea');
+            const rank = calculateRank();
+            
+            gameArea.innerHTML = `
+                <div class="victory-screen">
+                    <div class="victory-title">🏆 VICTORY!</div>
+                    <div class="result-message success" style="font-size: 1.8em; margin: 30px 0;">
+                        You are now a legendary Base Hunter!
+                    </div>
+                    <div class="final-score">
+                        🪙 Tokens Collected: ${gameState.tokens}<br>
+                        ⚔️ Rounds Survived: ${gameState.rounds}<br>
+                        💪 Final Health: ${gameState.health}%<br>
+                        🏆 Total Score: ${gameState.score}<br>
+                        <span style="color: #10b981; font-size: 1.2em;">Rank: ${rank}</span>
+                    </div>
+                    <div class="inventory" style="text-align: center;">
+                        <div class="inventory-title">🏅 Achievement Unlocked!</div>
+                        <div style="font-size: 3em; margin: 20px 0;">
+                            ${gameState.tokens >= 10 ? '👑' : '⭐'}
+                        </div>
+                        <div style="font-size: 1.3em;">
+                            ${gameState.tokens >= 10 ? 'Token Master!' : 'Survivor Champion!'}
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn success" onclick="resetGame()">🔄 Play Again</button>
+                        <button class="action-btn" onclick="showLeaderboard()">🏆 Leaderboard</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Game Over
+        function gameOver() {
+            const gameArea = document.getElementById('gameArea');
+            
+            gameArea.innerHTML = `
+                <div class="victory-screen">
+                    <div class="result-message danger" style="font-size: 2.5em;">
+                        💀 GAME OVER
+                    </div>
+                    <div class="scene-text" style="text-align: center; font-size: 1.5em;">
+                        Your health reached zero!<br>
+                        But every hunter faces defeat...
+                    </div>
+                    <div class="final-score">
+                        🪙 Tokens Collected: ${gameState.tokens}<br>
+                        ⚔️ Rounds Survived: ${gameState.rounds}<br>
+                        🏆 Final Score: ${gameState.score}
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn success" onclick="resetGame()">🔄 Try Again</button>
+                        <button class="action-btn" onclick="showLeaderboard()">🏆 Leaderboard</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Calculate Rank
+        function calculateRank() {
+            if (gameState.score >= 800) return 'S - Legendary Hunter!';
+            if (gameState.score >= 600) return 'A - Master Hunter!';
+            if (gameState.score >= 400) return 'B - Expert Hunter!';
+            if (gameState.score >= 200) return 'C - Skilled Hunter!';
+            return 'D - Novice Hunter';
+        }
+        
+        // Show Leaderboard
+        function showLeaderboard() {
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <div class="hunting-ground">
+                    <div class="leaderboard">
+                        <div class="leaderboard-title">🏆 Top Hunters</div>
+                        <div class="leaderboard-entry">
+                            <div class="rank-badge">1</div>
+                            <div class="player-info">
+                                <strong>@legendaryHunter</strong><br>
+                                <small style="color: #94a3b8;">10 tokens, 12 rounds</small>
+                            </div>
+                            <div class="score-badge">950 pts</div>
+                        </div>
+                        <div class="leaderboard-entry">
+                            <div class="rank-badge">2</div>
+                            <div class="player-info">
+                                <strong>@tokenMaster</strong><br>
+                                <small style="color: #94a3b8;">9 tokens, 10 rounds</small>
+                            </div>
+                            <div class="score-badge">820 pts</div>
+                        </div>
+                        <div class="leaderboard-entry">
+                            <div class="rank-badge">3</div>
+                            <div class="player-info">
+                                <strong>@baseExplorer</strong><br>
+                                <small style="color: #94a3b8;">8 tokens, 15 rounds</small>
+                            </div>
+                            <div class="score-badge">750 pts</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn success" onclick="startHunting()">🎯 Start Hunting</button>
+                        <button class="action-btn" onclick="renderMainMenu()">🏠 Main Menu</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Show How to Play
+        function showHowToPlay() {
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <div class="hunting-ground">
+                    <div class="how-to-play">
+                        <h3>📖 How to Play</h3>
+                        <ul>
+                            <li>Choose one of three targets each round</li>
+                            <li>🪙 Tokens give you points and progress</li>
+                            <li>💣 Traps damage your health</li>
+                            <li>🎁 Mystery boxes can be good or bad</li>
+                            <li>⚡ Special items heal or boost you</li>
+                            <li>🏆 Win by collecting 10 tokens or surviving 15 rounds</li>
+                            <li>💀 Lose if health reaches zero</li>
+                            <li>Higher scores = better rank!</li>
+                        </ul>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn success" onclick="startHunting()">🎯 Start Game</button>
+                        <button class="action-btn" onclick="renderMainMenu()">🏠 Main Menu</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Update Stats
+        function updateStats() {
+            document.getElementById('tokens').textContent = gameState.tokens;
+            document.getElementById('health').textContent = gameState.health;
+            document.getElementById('rounds').textContent = gameState.rounds;
+            document.getElementById('score').textContent = gameState.score;
+        }
+        
+        // Reset Game
+        function resetGame() {
+            gameState = {
+                tokens: 0,
+                health: 100,
+                rounds: 0,
+                score: 0,
+                inventory: [],
+                difficulty: 1
+            };
+            updateStats();
+            renderMainMenu();
+        }
+        
+        // Start Game
+        initGame();
+    </script>
+</body>
+</html>
